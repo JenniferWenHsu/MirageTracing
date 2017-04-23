@@ -64,25 +64,28 @@ bool nextIntersection(
     int num_slabs)
 {
     int num_slabs = 5;   
-    double height = 480; 
+    double height = 480; // NEED TO CHANGE THIS VALUE
     double slab_height = height / num_slabs;
 
     // check if there is intersection 
     for(unsigned i = 0; i<spheres.size(); i++){
         if (spheres[i].intersect(rayorigin, raydir, t0, t1)) return false; 
     }
-    // Determine how to get the right slab and the refractive index. 
-    double refractive_index[5] = {1, 1.01, 1.02, 1.03, 1.04}; 
 
-    double index = refractive_index(int(rayorigin.y / slab_height) - 1); 
-    double alpha = 0; 
+    double alpha = 0;
+    double ceiling, floor;  
     if (raydir.y >= 0){
-        alpha = floor(rayorigin.y / slab_height + slab_height); 
+        alpha = floor(rayorigin.y / slab_height + slab_height);
+        ceiling = alpha; 
+        floor = alpha - slab_height;  
     } 
     else{
-        alpha = floor(rayorigin.y / slab_height); 
+        alpha = floor(rayorigin.y / slab_height);
+        ceiling = alpha + slab_height; 
+        floor = alpha;  
     }
 
+ 	double index = linear_refraction_interpolate((ceiling + floor)/2.0, 1, 1.05); 
     double t = (alpha - rayorigin.x)/(raydir.y); 
     
     new_origin.x = rayorigin.x + t*raydir.x; 
@@ -90,10 +93,9 @@ bool nextIntersection(
     new_origin.z = rayorigin.z + t*raydir.z; 
 
     // calculating the new direction 
-    double theta_1 = 
-    new_direction.x = 
-    new_direction.y =  
-    new_direction.z =  
+    double theta_1 = 180 - acos(dot(raydir, Vector3D(0, 1, 0)));
+    double theta_2 = asin(index1/index2 * sin(theta_1));  
+    new_direction = Vector3D(0, -1, 0)/ cos(theta_2); 
 
     return true; 
 }
